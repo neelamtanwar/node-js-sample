@@ -10,19 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          cd node-js-sample || git clone https://github.com/neelamtanwar/node-js-sample.git
-          cd node-js-sample
-          sudo docker build -t my-app .
-          sudo docker stop app || true
-          sudo docker rm app || true
-          sudo docker run -d -p 5000:5000 --name app my-app
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            if [ ! -d "node-js-sample" ]; then
+              git clone https://github.com/neelamtanwar/node-js-sample.git
+            fi
+            cd node-js-sample
+            sudo docker build -t my-app .
+            sudo docker stop app || true
+            sudo docker rm app || true
+            sudo docker run -d -p 5000:5000 --name app my-app
